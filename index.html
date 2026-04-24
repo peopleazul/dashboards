@@ -82,27 +82,15 @@
   }
 
   .header-link {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12.5px;
     color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    padding: 8px 14px;
-    border: 1.5px solid var(--primary-mid);
-    border-radius: 8px;
-    transition: all 0.2s;
-    background: var(--primary-light);
+    text-decoration: underline;
+    font-weight: 700;
+    transition: opacity 0.2s;
   }
 
-  .header-link:hover {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-  }
+  .header-link:hover { opacity: 0.75; }
 
-  .header-link svg { width: 13px; height: 13px; }
+  .header-time { color: var(--low); font-weight: 700; }
 
   /* MAIN */
   main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
@@ -424,13 +412,9 @@
     <div class="logo-dot"></div>
     <div>
       <div class="header-title">Adesão Peakon <span>Abril</span></div>
-      <div class="header-subtitle">Acompanhe o engajamento da sua equipe em tempo real</div>
+      <div class="header-subtitle">Esse report foi atualizado às <span class="header-time">15:30h</span>, para acompanhar o engajamento da sua equipe em tempo real, <a href="https://visma.peakon.com/" target="_blank" class="header-link">clique aqui</a>.</div>
     </div>
   </div>
-  <a href="https://visma.peakon.com/" target="_blank" class="header-link">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-    <span>Acessar Peakon</span>
-  </a>
 </header>
 
 <main>
@@ -480,7 +464,7 @@
           <th onclick="sortTable('diretoria')">DIRETORIA <span class="sort-icon">↕</span></th>
           <th onclick="sortTable('area')">ÁREA <span class="sort-icon">↕</span></th>
           <th onclick="sortTable('escopo')">ESCOPO <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable('pct')" class="bar-cell sorted">TAXA DE ADESÃO <span class="sort-icon">↓</span></th>
+          <th onclick="sortTable('pct')" class="bar-cell sorted">TAXA DE ADESÃO <span class="sort-icon">↑</span></th>
           <th onclick="sortTable('faixa')">FAIXA <span class="sort-icon">↕</span></th>
         </tr>
       </thead>
@@ -524,7 +508,7 @@ const areaSel = document.getElementById('areaFilter');
 dirs.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; dirSel.appendChild(o); });
 areas.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; areaSel.appendChild(o); });
 
-let sortCol = 'pct', sortDir = -1, scopeFilter = 'todos';
+let sortCol = 'pct', sortDir = 1, scopeFilter = 'todos';
 
 function getFiltered() {
   const q = document.getElementById('searchInput').value.toLowerCase();
@@ -627,7 +611,7 @@ function render() {
 
 function sortTable(col) {
   if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = col === 'pct' ? -1 : 1; }
+  else { sortCol = col; sortDir = 1; }
   document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
   render();
 }
