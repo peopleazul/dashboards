@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Climate · Conta Azul · Apr 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #f5f5f7;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.14);
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #aeaeb2;
+  --accent: #1A90FF;
+  --accent-soft: #e6f4ff;
+  --red: #c0392b;
+  --red-soft: #fff0ef;
+  --green: #1a7a3a;
+  --green-soft: #edf7f1;
+  --amber: #92580a;
+  --amber-soft: #fff8ec;
+  --gold: #d4a017;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.06);
+  --shadow-hover: 0 8px 32px rgba(0,0,0,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+/* ── HEADER ── */
+.topbar {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 48px;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; letter-spacing: -0.3px;
+}
+.brand-text h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: var(--text-primary); }
+.brand-text p { font-size: 11px; color: var(--text-secondary); margin-top: 0px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.lang-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px; padding: 5px 12px;
+  font-size: 12px; font-weight: 500; color: var(--text-primary);
+  cursor: pointer; transition: all 0.15s;
+  font-family: inherit;
+}
+.lang-btn:hover { background: #e8e8ed; }
+.period-badge {
+  background: var(--text-primary); color: #fff;
+  border-radius: 8px; padding: 5px 12px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+}
+/* ── PDF BUTTON ── */
+.pdf-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--text-primary); color: #fff;
+  border: none; border-radius: 8px; padding: 5px 14px;
+  font-size: 12px; font-weight: 600; font-family: inherit;
+  cursor: pointer; transition: all 0.18s; letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.pdf-btn:hover { background: #333; box-shadow: 0 4px 14px rgba(0,0,0,0.28); transform: translateY(-1px); }
+.pdf-btn:active { transform: translateY(0); }
+.pdf-btn svg { flex-shrink: 0; }
+.pdf-btn.loading { opacity: 0.7; pointer-events: none; }
+/* ── PDF OVERLAY ── */
+#pdfOverlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+#pdfOverlay.visible { display: flex; }
+.pdf-overlay-box {
+  background: #fff; border-radius: 20px;
+  padding: 36px 44px; text-align: center;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.22);
+  max-width: 340px;
+}
+.pdf-overlay-spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--accent);
+  animation: spin 0.75s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.pdf-overlay-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+.pdf-overlay-sub { font-size: 12px; color: var(--text-secondary); }
+/* ── TABS ── */
+.tabs-bar {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.tabs-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 48px;
+  display: flex; gap: 2px;
+}
+.tab {
+  padding: 12px 18px;
+  font-size: 12px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.2s; letter-spacing: 0.01em;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* ── LAYOUT ── */
+.main { max-width: 1200px; margin: 0 auto; padding: 40px 48px 80px; }
+.page { display: none; }
+.page.active { display: block; }
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 28px 28px 24px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-hover); }
+.card-label {
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px;
+}
+/* ── CARD HEAD WITH ICON ── */
+.card-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.card-head-icon {
+  width: 36px; height: 36px;
+  background: var(--accent-soft);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.card-head-icon svg {
+  width: 18px; height: 18px;
+  stroke: var(--accent);
+  fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.card-head-icon.green { background: var(--green-soft); }
+.card-head-icon.green svg { stroke: var(--green); }
+.card-head-icon.amber { background: var(--amber-soft); }
+.card-head-icon.amber svg { stroke: var(--amber); }
+.card-head-icon.red { background: var(--red-soft); }
+.card-head-icon.red svg { stroke: var(--red); }
+.card-head .card-label { margin-bottom: 0; }
+/* ── KPI ICON (page 2) ── */
+.p2-kpi-icon {
+  width: 32px; height: 32px;
+  background: var(--accent-soft);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.p2-kpi-icon svg {
+  width: 16px; height: 16px;
+  stroke: var(--accent);
+  fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.p2-kpi-icon.green { background: var(--green-soft); }
+.p2-kpi-icon.green svg { stroke: var(--green); }
+.p2-kpi-icon.red { background: var(--red-soft); }
+.p2-kpi-icon.red svg { stroke: var(--red); }
+.p2-kpi-icon.amber { background: var(--amber-soft); }
+.p2-kpi-icon.amber svg { stroke: var(--amber); }
+/* ── PAGE 1 GRID ── */
+.p1-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+.p1-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.p1-bot { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.next-steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+/* ── METRIC CARDS ── */
+.metric-card { text-align: left; padding: 28px; }
+.metric-icon {
+  width: 52px; height: 52px;
+  background: var(--accent-soft);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.metric-icon svg { width: 28px; height: 28px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.metric-num {
+  font-size: 52px; font-weight: 700; letter-spacing: -3px; line-height: 1;
+  color: var(--text-primary);
+}
+.metric-num.accent { color: var(--accent); }
+.metric-delta {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 600;
+  padding: 4px 9px; border-radius: 6px; margin-left: 10px; vertical-align: middle;
+}
+.delta-neg { background: var(--red-soft); color: var(--red); }
+.delta-pos { background: var(--green-soft); color: var(--green); }
+.delta-neu { background: var(--surface-2); color: var(--text-secondary); }
+.delta-flat { background: var(--accent-soft); color: var(--accent); }
+.metric-mini-bar {
+  height: 3px; background: var(--border);
+  border-radius: 2px; overflow: hidden; margin-top: 16px; margin-bottom: 14px;
+}
+.metric-mini-bar-fill { height: 100%; border-radius: 2px; }
+.metric-name { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+.metric-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+/* ── HORIZONTAL BAR CHART ── */
+.hbar-list { display: flex; flex-direction: column; gap: 10px; }
+.hbar-row { display: flex; align-items: center; gap: 12px; }
+.hbar-label { font-size: 12px; color: var(--text-primary); width: 120px; flex-shrink: 0; font-weight: 400; }
+.hbar-track { flex: 1; height: 6px; background: var(--surface-2); border-radius: 3px; overflow: visible; position: relative; }
+.hbar-excellence-line {
+  position: absolute;
+  left: 75%;
+  top: -6px;
+  bottom: -6px;
+  width: 0;
+  border-left: 2px dashed var(--accent);
+  pointer-events: none;
+  z-index: 2;
+}
+.hbar-excellence-label {
+  font-size: 9px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(26,144,255,0.3);
+}
+.hbar-fill { height: 100%; border-radius: 3px; }
+.hbar-right { display: flex; align-items: center; gap: 8px; width: 80px; flex-shrink: 0; justify-content: flex-end; }
+.hbar-score { font-size: 13px; font-weight: 600; color: var(--text-primary); width: 26px; text-align: right; }
+.delta-tag {
+  font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 5px; min-width: 36px; text-align: center;
+}
+/* ── INSIGHT PANEL ── */
+.insight-card {
+  padding: 32px 36px 28px;
+  background: var(--accent);
+  border-radius: var(--radius);
+  border: none;
+  box-shadow: 0 4px 24px rgba(26,144,255,0.25);
+  margin-bottom: 24px;
+}
+.insight-card .card-label { color: rgba(255,255,255,0.55); margin-bottom: 28px; }
+.insight-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 24px;
+}
+.insight-icon {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.insight-icon svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.insight-h { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+.insight-p { font-size: 12px; color: rgba(255,255,255,0.78); line-height: 1.7; }
+.insight-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 36px;
+  margin-bottom: 4px;
+}
+/* Standalone Loyalty alert — independent strip below Vozes dos Azuis */
+.standalone-alert {
+  display: flex; align-items: flex-start; gap: 16px;
+  background: var(--amber-soft);
+  border: 1px solid rgba(146,88,10,0.20);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.standalone-alert-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: rgba(146,88,10,0.14);
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.standalone-alert-icon svg {
+  width: 22px; height: 22px;
+  stroke: var(--amber);
+  fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.standalone-alert-body { flex: 1; line-height: 1.55; }
+.standalone-alert-title {
+  font-size: 13px; font-weight: 700; color: var(--amber);
+  margin-bottom: 4px;
+}
+.standalone-alert-text {
+  font-size: 12.5px; color: var(--text-secondary);
+}
+/* Evidence chip */
+.insight-evidence {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.insight-evidence svg {
+  width: 11px; height: 11px;
+  stroke: rgba(255,255,255,0.85);
+  fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.insight-evidence .ev-delta {
+  color: #f0c060;
+  font-weight: 700;
+  margin-left: 2px;
+}
+/* hm-narrative — cycle movement summary block */
+.hm-narrative {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent);
+}
+.hm-narrative-icon {
+  width: 32px; height: 32px;
+  flex-shrink: 0;
+  background: var(--accent-soft);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+}
+.hm-narrative-icon svg {
+  width: 18px; height: 18px;
+  stroke: var(--accent);
+  fill: none;
+}
+.hm-narrative-text { flex: 1; line-height: 1.55; }
+.hm-narrative-text strong {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.hm-narrative-text span {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.hm-narrative-text b {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.insight-divider { height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 20px; }
+.insight-alert {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  display: flex; align-items: flex-start; gap: 16px;
+}
+.insight-alert-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: rgba(212,160,23,0.2);
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+.insight-alert-icon svg { width: 22px; height: 22px; stroke: #f0c060; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.insight-alert .insight-h { color: #f0c060; font-size: 12px; margin-bottom: 4px; }
+.insight-alert .insight-p { font-size: 12px; }
+/* ── DRIVERS ── */
+.driver-section { margin-bottom: 20px; }
+.driver-section:last-child { margin-bottom: 0; }
+.driver-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-tertiary); margin-bottom: 12px; }
+.driver-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.driver-row:last-child { margin-bottom: 0; }
+.driver-name { font-size: 12px; color: var(--text-primary); width: 120px; flex-shrink: 0; }
+.driver-track { flex: 1; height: 4px; background: var(--surface-2); border-radius: 2px; }
+.driver-bar { height: 100%; border-radius: 2px; }
+.driver-score { font-size: 12px; font-weight: 600; color: var(--text-primary); width: 24px; text-align: right; }
+/* ── NEXT STEPS ── */
+.step-section { margin-bottom: 20px; }
+.step-section:last-child { margin-bottom: 0; }
+.step-section-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.step-section-badge {
+  font-size: 9px; font-weight: 700; padding: 3px 8px;
+  border-radius: 5px; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0;
+}
+.badge-transversal { background: var(--accent-soft); color: var(--accent); }
+.badge-diretoria { background: var(--amber-soft); color: var(--amber); }
+.step-section-title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.step-list { display: flex; flex-direction: column; gap: 11px; }
+.step-item { display: flex; gap: 12px; align-items: flex-start; }
+.step-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0; margin-top: 4px;
+}
+.step-dot.amber { background: var(--amber); }
+.step-text { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.step-text strong { color: var(--text-primary); font-weight: 600; }
+/* ── PAGE 2 ── */
+.p2-kpis { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 24px; }
+.p2-kpi {
+  background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border);
+  padding: 20px 16px; text-align: left; box-shadow: var(--shadow); transition: box-shadow 0.2s;
+}
+.p2-kpi:hover { box-shadow: var(--shadow-hover); }
+.p2-kpi.primary { border: 1.5px solid var(--accent); background: var(--accent-soft); }
+.p2-kpi-val { font-size: 36px; font-weight: 700; letter-spacing: -2px; line-height: 1; margin-bottom: 6px; }
+.p2-kpi-var { font-size: 11px; font-weight: 600; color: var(--red); margin-bottom: 8px; }
+.p2-kpi-var.amber { color: var(--amber); }
+.p2-kpi-lbl { font-size: 11px; font-weight: 600; color: var(--text-primary); }
+.p2-kpi-sub { font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+.p2-main { margin-bottom: 24px; }
+.p2-bot { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* REC CARDS */
+.rec-card { padding: 24px; }
+.rec-header { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+.rec-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+.badge-red { background: var(--red-soft); color: var(--red); }
+.badge-green { background: var(--green-soft); color: var(--green); }
+.badge-blue { background: var(--accent-soft); color: var(--accent); }
+.rec-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.rec-list { display: flex; flex-direction: column; gap: 0; }
+.rec-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: flex-start; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.rec-item:last-child { border-bottom: none; padding-bottom: 0; }
+.rec-item strong { color: var(--text-primary); font-weight: 600; }
+.rec-arrow { color: var(--accent); font-size: 12px; flex-shrink: 0; margin-top: 2px; font-weight: 600; }
+/* ── MOVEMENTS (Top 3 Strengths & Opportunities) ── */
+.movements-card { padding: 28px; margin-bottom: 24px; }
+.movements-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 4px;
+}
+.movements-col-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 14px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.movements-col-title.strength { color: var(--green); }
+.movements-col-title.opp { color: var(--amber); }
+.move-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.move-row:last-child { border-bottom: none; }
+.move-rank {
+  font-size: 13px; font-weight: 700; color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  display: flex; align-items: baseline; gap: 1px;
+}
+.rank-tie {
+  font-size: 10px; font-weight: 600;
+  color: var(--text-tertiary);
+  opacity: 0.7;
+}
+.move-name { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.move-score {
+  font-size: 14px; font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  min-width: 28px; text-align: right;
+}
+.move-delta {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 7px; border-radius: 5px;
+  min-width: 56px; justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+.move-delta.up { background: var(--green-soft); color: var(--green); }
+.move-delta.down { background: var(--red-soft); color: var(--red); }
+.move-delta.flat { background: var(--accent-soft); color: var(--accent); }
+.move-delta.new { background: var(--amber-soft); color: var(--amber); }
+.movements-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-top: 18px; padding-top: 14px;
+  border-top: 1px dashed var(--border);
+  font-size: 10px; color: var(--text-tertiary);
+}
+.movements-legend-item { display: flex; align-items: center; gap: 5px; }
+.movements-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+/* ── HEATMAP ── */
+.heatmap-card { padding: 28px; margin-bottom: 24px; }
+.heatmap-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px; gap: 16px; flex-wrap: wrap;
+}
+.heatmap-head-left { display: flex; align-items: center; gap: 12px; }
+.heatmap-sub {
+  font-size: 11px; color: var(--text-tertiary);
+  margin-bottom: 20px;
+}
+/* Toggle */
+.hm-toggle {
+  display: inline-flex;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.hm-toggle-btn {
+  background: transparent;
+  border: none;
+  padding: 7px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 7px;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.hm-toggle-btn:hover { color: var(--text-primary); }
+.hm-toggle-btn.active {
+  background: #fff;
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+}
+/* Heatmap grid */
+.hm-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+.hm-cell {
+  position: relative;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 14px 14px;
+  display: flex; flex-direction: column;
+  min-height: 120px;
+  transition: all 0.25s ease;
+  cursor: default;
+}
+.hm-cell-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.5);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+}
+.hm-cell-icon svg {
+  width: 16px; height: 16px;
+  stroke: currentColor;
+  fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.hm-cell-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 8px;
+  min-height: 28px;
+}
+.hm-cell-val {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1.2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-top: auto;
+}
+.hm-cell-val .sign { font-size: 22px; letter-spacing: -0.5px; }
+.hm-cell-badge {
+  position: absolute;
+  top: 14px; right: 14px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.hm-cell.featured {
+  border-width: 1.5px;
+}
+/* Score color zones */
+.hm-zone-excellence {
+  background: var(--green-soft);
+  border-color: rgba(26,122,58,0.18);
+  color: var(--green);
+}
+.hm-zone-excellence .hm-cell-icon { background: rgba(26,122,58,0.12); }
+.hm-zone-excellence .hm-cell-val { color: var(--green); }
+.hm-zone-excellence .hm-cell-badge {
+  background: rgba(26,122,58,0.15);
+  color: var(--green);
+}
+.hm-zone-quality {
+  background: var(--accent-soft);
+  border-color: rgba(26,144,255,0.18);
+  color: var(--accent);
+}
+.hm-zone-quality .hm-cell-icon { background: rgba(26,144,255,0.12); }
+.hm-zone-quality .hm-cell-val { color: var(--accent); }
+.hm-zone-quality .hm-cell-badge {
+  background: rgba(26,144,255,0.15);
+  color: var(--accent);
+}
+.hm-zone-improvement {
+  background: var(--red-soft);
+  border-color: rgba(192,57,43,0.18);
+  color: var(--red);
+}
+.hm-zone-improvement .hm-cell-icon { background: rgba(192,57,43,0.12); }
+.hm-zone-improvement .hm-cell-val { color: var(--red); }
+.hm-zone-improvement .hm-cell-badge {
+  background: rgba(192,57,43,0.15);
+  color: var(--red);
+}
+/* MoM color zones */
+.hm-mom-up {
+  background: var(--green-soft);
+  border-color: rgba(26,122,58,0.18);
+  color: var(--green);
+}
+.hm-mom-up .hm-cell-icon { background: rgba(26,122,58,0.12); }
+.hm-mom-up .hm-cell-val { color: var(--green); }
+.hm-mom-down {
+  background: var(--red-soft);
+  border-color: rgba(192,57,43,0.18);
+  color: var(--red);
+}
+.hm-mom-down .hm-cell-icon { background: rgba(192,57,43,0.12); }
+.hm-mom-down .hm-cell-val { color: var(--red); }
+.hm-mom-flat {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+.hm-mom-flat .hm-cell-icon { background: rgba(0,0,0,0.04); }
+.hm-mom-flat .hm-cell-val { color: var(--text-secondary); }
+/* Heatmap legend */
+.hm-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-top: 18px; padding-top: 14px;
+  border-top: 1px dashed var(--border);
+  font-size: 10px; color: var(--text-tertiary);
+}
+.hm-legend-item { display: flex; align-items: center; gap: 6px; }
+.hm-legend-chip {
+  width: 14px; height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">CA</div>
+      <div class="brand-text">
+        <h1>Our Climate</h1>
+        <p>People &amp; Culture · Executive Report</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-btn" onclick="toggleLang()">
+        <span id="langFlag">🇧🇷</span>
+        <span id="langLabel">PT</span>
+      </button>
+      <div class="period-badge">Apr 2026</div>
+      <button class="pdf-btn" id="pdfBtn" onclick="exportPDF()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Export PDF</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs-bar">
+  <div class="tabs-inner">
+    <div class="tab active" id="tab0" onclick="switchPage(0)" data-en="Overview" data-pt="Visão Geral">Overview</div>
+    <div class="tab" id="tab1" onclick="switchPage(1)" data-en="Engagement" data-pt="Engajamento">Engagement</div>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- PAGE 1: OVERVIEW -->
+<div class="page active" id="page0">
+  <div class="p1-kpis">
+    <div class="card metric-card">
+      <div class="metric-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="card-label" data-en="Participation" data-pt="Participação">Participation</div>
+      <div>
+        <span class="metric-num accent">83<span style="font-size:28px;letter-spacing:-1px;color:var(--text-secondary)">%</span></span>
+        <span class="metric-delta delta-flat">▲ 0</span>
+      </div>
+      <div class="metric-mini-bar"><div class="metric-mini-bar-fill" style="width:83%;background:var(--accent)"></div></div>
+      <div class="metric-name" data-en="High · Score precision: High" data-pt="Alta · Precisão do score: Alta">High · Score precision: High</div>
+      <div class="metric-sub" data-en="No variation vs Mar" data-pt="Sem variação vs Mar">No variation vs Mar</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div class="card-label" data-en="Engagement Index" data-pt="Índice de Engajamento">Engagement Index</div>
+      <div>
+        <span class="metric-num">72</span>
+        <span class="metric-delta delta-neg">▼ 9</span>
+      </div>
+      <div class="metric-mini-bar"><div class="metric-mini-bar-fill" style="width:72%;background:var(--accent)"></div></div>
+      <div class="metric-name" data-en="Quality zone (>50)" data-pt="Zona de Qualidade (>50)">Quality zone (&gt;50)</div>
+      <div class="metric-sub" data-en="Previously in Excellence zone (>75)" data-pt="Anteriormente na zona de Excelência (>75)">Previously in Excellence zone (&gt;75)</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric-icon" style="background:#edf7f1">
+        <svg viewBox="0 0 24 24" style="stroke:var(--green)">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div class="card-label" data-en="Leadership Index" data-pt="Índice de Liderança">Leadership Index</div>
+      <div>
+        <span class="metric-num">76</span>
+        <span class="metric-delta delta-neg">▼ 2</span>
+      </div>
+      <div class="metric-mini-bar"><div class="metric-mini-bar-fill" style="width:76%;background:var(--green)"></div></div>
+      <div class="metric-name" data-en="Excellence zone (>75)" data-pt="Zona de Excelência (>75)">Excellence zone (&gt;75)</div>
+      <div class="metric-sub" data-en="+6 above Visma benchmark" data-pt="+6 acima do benchmark Visma">+6 above Visma benchmark</div>
+    </div>
+  </div>
+
+  <!-- VOZES DOS AZUIS — qualitative analysis from comments -->
+  <div class="insight-card">
+    <div class="card-label" data-en="Voices of the Azuis" data-pt="Vozes dos Azuis">Voices of the Azuis</div>
+    <div class="insight-grid-2">
+      <div class="insight-section">
+        <div class="insight-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="insight-h" data-en="Uncertainty about the future" data-pt="Incerteza sobre o futuro">Uncertainty about the future</div>
+        <div class="insight-p" data-en="Recent movements and the advancing AI agenda have created concern. There is a lack of clarity on how human development and career paths will evolve alongside AI." data-pt="As movimentações recentes e o avanço da agenda da IA têm gerado preocupação. Há uma falta de clareza sobre como o desenvolvimento humano e as trajetórias de carreira irão evoluir em paralelo com a IA.">Recent movements and the advancing AI agenda have created concern. There is a lack of clarity on how human development and career paths will evolve alongside AI.</div>
+        <div class="insight-evidence">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span data-en="29 mentions · score 6.2 vs 8.2 general" data-pt="29 menções · score 6,2 vs 8,2 geral">29 mentions · score 6.2 vs 8.2 general</span>
+          <span class="ev-delta" data-en="−2.0" data-pt="−2,0">−2.0</span>
+        </div>
+      </div>
+      <div class="insight-section">
+        <div class="insight-icon">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="insight-h" data-en="Sense of belonging" data-pt="Senso de pertencimento">Sense of belonging</div>
+        <div class="insight-p" data-en='The work environment is described as "colder" and less people-centered.' data-pt='O ambiente de trabalho é descrito como "mais frio" e menos centrado nas pessoas.'>The work environment is described as "colder" and less people-centered.</div>
+        <div class="insight-evidence">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span data-en="20 mentions · score 6.4 vs 8.2 general" data-pt="20 menções · score 6,4 vs 8,2 geral">20 mentions · score 6.4 vs 8.2 general</span>
+          <span class="ev-delta" data-en="−1.8" data-pt="−1,8">−1.8</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px;font-size:9.5px;color:rgba(255,255,255,0.55);font-style:italic;line-height:1.55" data-en="Metodologia Peakon: keyword matching analysis on PT+EN comments (n=568) with valence filters. Numbers represent a floor — comments using vocabulary outside the matching set may not be captured." data-pt="Metodologia Peakon: análise por matching de palavras-chave em comentários PT+EN (n=568) com filtros de valência. Os números representam um piso — comentários com vocabulário fora do conjunto de matching podem não ter sido capturados.">Metodologia Peakon: keyword matching analysis on PT+EN comments (n=568) with valence filters. Numbers represent a floor — comments using vocabulary outside the matching set may not be captured.</div>
+  </div>
+
+  <!-- LOYALTY ALERT — standalone strip -->
+  <div class="standalone-alert">
+    <div class="standalone-alert-icon">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="standalone-alert-body">
+      <div class="standalone-alert-title" data-en="Alert — Loyalty subdriver: 39" data-pt="Alerta — Subdriver Lealdade: 39">Alert — Loyalty subdriver: 39</div>
+      <div class="standalone-alert-text" data-en="Measures each Azul's intention to stay if offered a comparable external role. Signals risk of critical talent loss." data-pt="Mede a intenção do Azul permanecer conosco caso receba uma oferta de trabalho comparável no mercado. Representa risco de perda de talentos críticos.">Measures each Azul's intention to stay if offered a comparable external role. Signals risk of critical talent loss.</div>
+    </div>
+  </div>
+
+  <div class="p1-charts">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"/><line x1="9" y1="9" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="21" y1="9" x2="3" y2="9"/><line x1="21" y1="15" x2="3" y2="15"/></svg>
+        </div>
+        <div class="card-label" data-en="Engagement Index by Department" data-pt="Índice de Engajamento por Diretoria">Engagement Index by Department</div>
+      </div>
+      <div class="hbar-list" id="engList"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon green">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="card-label" data-en="Leadership Index by Department" data-pt="Índice de Liderança por Diretoria">Leadership Index by Department</div>
+      </div>
+      <div class="hbar-list" id="leadList"></div>
+    </div>
+  </div>
+
+  <div class="p1-bot">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon amber">
+          <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="card-label" data-en="Next Steps" data-pt="Próximos Passos">Next Steps</div>
+      </div>
+      <div class="next-steps-grid">
+        <div class="step-section" style="margin-bottom:0">
+          <div class="step-section-header">
+            <span class="step-section-badge badge-transversal" data-en="Transversal" data-pt="Transversal">Transversal</span>
+            <span class="step-section-title" data-en="For All Leaders" data-pt="Para Toda a Liderança">For All Leaders</span>
+          </div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-dot"></div>
+              <div class="step-text"><strong data-en="Leadership Ownership" data-pt="Protagonismo da Liderança">Leadership Ownership</strong><br>
+              <span data-en="Change management and team conversations must be reinforced and owned by the direct manager." data-pt="A gestão da mudança e conversas de time precisa ser reforçada e priorizada pelo líder direto.">Change management and team conversations must be reinforced and owned by the direct manager.</span></div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot"></div>
+              <div class="step-text"><strong data-en="Loyalty" data-pt="Lealdade">Loyalty</strong><br>
+              <span data-en="Leaders proactively strengthen key relationships — recognition, career clarity, open dialogue." data-pt="Líderes fortalecem relações com pessoas-chave — reconhecimento, clareza de carreira, diálogo aberto.">Leaders proactively strengthen key relationships — recognition, career clarity, open dialogue.</span></div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot"></div>
+              <div class="step-text"><strong data-en="Satisfaction" data-pt="Satisfação">Satisfaction</strong><br>
+              <span data-en="Build individual narrative per team. Strategic vision exists — personal translation is missing." data-pt="Construir narrativa individual por time. A visão estratégica existe — falta a tradução pessoal.">Build individual narrative per team. Strategic vision exists — personal translation is missing.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-section" style="margin-bottom:0">
+          <div class="step-section-header">
+            <span class="step-section-badge badge-diretoria" data-en="By Dept" data-pt="Por Diretoria">By Dept</span>
+            <span class="step-section-title" data-en="HRBP Focus" data-pt="Foco HRBP">HRBP Focus</span>
+          </div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-dot amber"></div>
+              <div class="step-text"><strong>Marketing</strong><br>
+              <span data-en="Loyalty: 30 — 39% neutrals and 15% detractors. High risk of voluntary turnover." data-pt="Lealdade: 30 - 39% de neutros e 15% de detratores, alta possibilidade de turnover voluntário.">Loyalty: 30 — 39% neutrals and 15% detractors. High risk of voluntary turnover.</span></div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot amber"></div>
+              <div class="step-text"><strong data-en="Product" data-pt="Produto">Product</strong><br>
+              <span data-en="Engagement ▼23pts in one cycle — qualitative findings will be shared with HRBP to support action planning." data-pt="Engajamento ▼23pts em um ciclo — diagnóstico qualitativo será compartilhado com HRBP para apoio na construção de ações.">Engagement ▼23pts in one cycle — qualitative findings will be shared with HRBP to support action planning.</span></div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot amber"></div>
+              <div class="step-text"><strong data-en="Technology" data-pt="Tecnologia">Technology</strong><br>
+              <span data-en="35 neutrals — Without clear leadership signal, the trend is migration toward detractors." data-pt="35 neutros — Sem sinal claro da liderança, a tendência é migração para detratores.">35 neutrals — Without clear leadership signal, the trend is migration toward detractors.</span></div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot amber"></div>
+              <div class="step-text"><strong>CX</strong><br>
+              <span data-en="Loyalty: 26 — 26% neutrals and 24% detractors. High risk of voluntary turnover." data-pt="Lealdade: 26 — 26% de neutros e 24% de detratores, alta possibilidade de turnover voluntário.">Loyalty: 26 — 26% neutrals and 24% detractors. High risk of voluntary turnover.</span></div>
+            </div>
+            <div class="step-item">
+              <div class="step-dot amber"></div>
+              <div class="step-text"><strong>Operations</strong><br>
+              <span data-en="Focus on Data (Analytics) area. Loyalty: <span style='color:var(--red);font-weight:700'>-10</span> — 30% neutrals and 40% detractors. High risk of voluntary turnover." data-pt="Foco na área Data (Analytics). Lealdade: <span style='color:var(--red);font-weight:700'>-10</span> — 30% de neutros e 40% de detratores, alta possibilidade de turnover voluntário.">Focus on Data (Analytics) area. Loyalty: <span style='color:var(--red);font-weight:700'>-10</span> — 30% neutrals and 40% detractors. High risk of voluntary turnover.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;margin-top:24px">
+    <button onclick="switchPage(1)" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;letter-spacing:-0.1px;box-shadow:0 4px 14px rgba(26,144,255,0.35);transition:all 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(26,144,255,0.45)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 4px 14px rgba(26,144,255,0.35)';this.style.transform='translateY(0)'">
+      <span data-en="View Engagement" data-pt="Ver Engajamento">View Engagement</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- PAGE 2: ENGAGEMENT -->
+<div class="page" id="page1">
+  <div class="p2-kpis">
+    <div class="p2-kpi primary">
+      <div class="p2-kpi-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="p2-kpi-val" style="color:var(--accent)">72</div>
+      <div class="p2-kpi-var">▼ 9 since Mar</div>
+      <div class="p2-kpi-lbl" data-en="Engagement Index" data-pt="Índice de Engajamento">Engagement Index</div>
+      <div class="p2-kpi-sub" data-en="Composite score based on 4 questions" data-pt="Pontuação calculada com base nas 4 perguntas">Composite score based on 4 questions</div>
+    </div>
+    <div class="p2-kpi">
+      <div class="p2-kpi-icon red">
+        <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+      </div>
+      <div class="p2-kpi-val" style="color:var(--red)">65</div>
+      <div class="p2-kpi-var">▼ 14 since Mar</div>
+      <div class="p2-kpi-lbl" data-en="Engagement" data-pt="Engajamento">Engagement</div>
+      <div class="p2-kpi-sub" data-en="Measures how likely Azuis are to recommend CA as a great place to work." data-pt="Mede a probabilidade do Azul recomendar a CA como um bom lugar para se trabalhar.">Measures how likely Azuis are to recommend CA as a great place to work.</div>
+    </div>
+    <div class="p2-kpi">
+      <div class="p2-kpi-icon red">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="p2-kpi-val" style="color:var(--red)">39</div>
+      <div class="p2-kpi-var">▼ 10 since Mar</div>
+      <div class="p2-kpi-lbl" data-en="Loyalty" data-pt="Lealdade">Loyalty</div>
+      <div class="p2-kpi-sub" data-en="Measures likelihood of staying if offered a comparable role externally." data-pt="Mede a probabilidade do Azul permanecer na CA se receber uma oferta comparável no mercado.">Measures likelihood of staying if offered a comparable role externally.</div>
+    </div>
+    <div class="p2-kpi">
+      <div class="p2-kpi-icon green">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="p2-kpi-val" style="color:var(--green)">79</div>
+      <div class="p2-kpi-var amber">▼ 5 since Mar</div>
+      <div class="p2-kpi-lbl" data-en="Trust" data-pt="Confiança">Trust</div>
+      <div class="p2-kpi-sub" data-en="Measures likelihood of recommending CA's products and services to friends and family." data-pt="Mede a probabilidade do Azul recomendar os produtos e serviços da CA a amigos e familiares.">Measures likelihood of recommending CA's products and services to friends and family.</div>
+    </div>
+    <div class="p2-kpi">
+      <div class="p2-kpi-icon red">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      </div>
+      <div class="p2-kpi-val" style="color:var(--red)">62</div>
+      <div class="p2-kpi-var">▼ 10 since Mar</div>
+      <div class="p2-kpi-lbl" data-en="Satisfaction" data-pt="Satisfação">Satisfaction</div>
+      <div class="p2-kpi-sub" data-en="Measures overall satisfaction with working at CA." data-pt="Mede o nível geral de satisfação do Azul em trabalhar na CA.">Measures overall satisfaction with working at CA.</div>
+    </div>
+  </div>
+
+  <div class="p2-main">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">
+          <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div class="card-label" data-en="Engagement Index — Subdriver Breakdown" data-pt="Índice de Engajamento — Composição por Subdrivers">Engagement Index — Subdriver Breakdown</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:20px;margin-top:-12px" data-en="CA consolidated · hover to inspect values" data-pt="CA consolidado · passe o mouse para ver valores">CA consolidated · hover to inspect values</div>
+      <div style="position:relative;height:280px"><canvas id="trendChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- MOVEMENTS: full width, above rec cards -->
+  <div class="card movements-card" style="margin-bottom:24px">
+    <div class="card-head">
+      <div class="card-head-icon">
+        <svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+      </div>
+      <div class="card-label" data-en="Movements · Mar → Apr" data-pt="Movimentos · Mar → Abr">Movements · Mar → Apr</div>
+    </div>
+
+    <div class="movements-grid">
+      <!-- TOP 3 STRENGTHS -->
+      <div>
+        <div class="movements-col-title strength">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span data-en="Top Strengths" data-pt="Top Fortalezas">Top Strengths</span>
+        </div>
+        <div class="move-row">
+          <div class="move-rank">1</div>
+          <div class="move-name" data-en="Peer relationships" data-pt="Relação com colegas">Peer relationships</div>
+          <div class="move-score">80</div>
+          <div class="move-delta flat" title="No change vs Mar (was 80)">▲ 0</div>
+        </div>
+        <div class="move-row">
+          <div class="move-rank">2</div>
+          <div class="move-name" data-en="Manager support" data-pt="Suporte da gerência">Manager support</div>
+          <div class="move-score">76</div>
+          <div class="move-delta down" title="Was 78 in Mar">▼ 2</div>
+        </div>
+        <div class="move-row">
+          <div class="move-rank">3</div>
+          <div class="move-name" data-en="Strategy" data-pt="Estratégia">Strategy</div>
+          <div class="move-score">73</div>
+          <div class="move-delta down" title="Was 76 in Mar">▼ 3</div>
+        </div>
+      </div>
+
+      <!-- TOP OPPORTUNITIES -->
+      <div>
+        <div class="movements-col-title opp">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span data-en="Top Opportunities" data-pt="Top Oportunidades">Top Opportunities</span>
+        </div>
+        <div class="move-row">
+          <div class="move-rank">1</div>
+          <div class="move-name" data-en="Growth" data-pt="Crescimento">Growth</div>
+          <div class="move-score">49</div>
+          <div class="move-delta down" title="Was 57 in Mar — biggest drop on the board">▼ 8</div>
+        </div>
+        <div class="move-row">
+          <div class="move-rank">2</div>
+          <div class="move-name" data-en="Recognition" data-pt="Reconhecimento">Recognition</div>
+          <div class="move-score">50</div>
+          <div class="move-delta down" title="Was 53 in Mar">▼ 3</div>
+        </div>
+        <div class="move-row tied">
+          <div class="move-rank">3<span class="rank-tie">=</span></div>
+          <div class="move-name" data-en="Autonomy" data-pt="Autonomia">Autonomy</div>
+          <div class="move-score">54</div>
+          <div class="move-delta up" title="Was 52 in Mar">▲ 2</div>
+        </div>
+        <div class="move-row tied">
+          <div class="move-rank">3<span class="rank-tie">=</span></div>
+          <div class="move-name" data-en="Workload" data-pt="Carga de trabalho">Workload</div>
+          <div class="move-score">54</div>
+          <div class="move-delta up" title="Was 51 in Mar — no longer the worst driver">▲ 3</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="movements-legend">
+      <div class="movements-legend-item"><span class="movements-legend-dot" style="background:var(--green)"></span><span data-en="Improved" data-pt="Evoluiu">Improved</span></div>
+      <div class="movements-legend-item"><span class="movements-legend-dot" style="background:var(--accent)"></span><span data-en="Held" data-pt="Manteve">Held</span></div>
+      <div class="movements-legend-item"><span class="movements-legend-dot" style="background:var(--red)"></span><span data-en="Dropped" data-pt="Caiu">Dropped</span></div>
+      <div class="movements-legend-item"><span class="movements-legend-dot" style="background:var(--text-tertiary)"></span><span data-en="= Tied rank" data-pt="= Empate de posição">= Tied rank</span></div>
+    </div>
+
+    <div class="hm-narrative" style="margin-top:20px">
+      <div class="hm-narrative-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+      </div>
+      <div class="hm-narrative-text">
+        <strong data-en="Cycle movement · Mar → Apr" data-pt="Movimento do ciclo · Mar → Abr">Cycle movement · Mar → Apr</strong>
+        <span data-en="<b>Growth entered</b> as the #1 opportunity — dropped 8 pts (57→49), the biggest fall on the board. <b>Workload</b> (51→54) is no longer the worst driver, though it remains tied at 3rd. <b>Top strengths held the same drivers</b>, with small dips in Manager Support (−2) and Strategy (−3)." data-pt="<b>Crescimento entrou</b> como oportunidade nº 1 — caiu 8 pts (57→49), a maior queda do período. <b>Carga de trabalho</b> (51→54) deixou de ser o pior driver, mas permanece empatada em 3º. <b>As principais fortalezas mantiveram os mesmos drivers</b>, com pequenas quedas em Suporte da gerência (−2) e Estratégia (−3)."><b>Growth entered</b> as the #1 opportunity — dropped 8 pts (57→49), the biggest fall on the board. <b>Workload</b> (51→54) is no longer the worst driver, though it remains tied at 3rd. <b>Top strengths held the same drivers</b>, with small dips in Manager Support (−2) and Strategy (−3).</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="p2-bot">
+    <div class="card rec-card">
+      <div class="rec-header">
+        <div class="card-head-icon green" style="width:30px;height:30px;border-radius:8px">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <span class="rec-badge badge-green" data-en="Assets" data-pt="Ativos">Assets</span>
+        <span class="rec-title" data-en="What to Preserve" data-pt="O que Preservar">What to Preserve</span>
+      </div>
+      <div class="rec-list">
+        <div class="rec-item"><span class="rec-arrow">→</span><span data-en="<strong>Trust (79)</strong> holds. People believe in product and mission. This is recoverable." data-pt="<strong>Confiança (79)</strong> resiste. As pessoas acreditam no produto e na missão. Isso é recuperável."><strong>Trust (79)</strong> holds. People believe in product and mission. This is recoverable.</span></div>
+        <div class="rec-item"><span class="rec-arrow">→</span><span data-en="<strong>Leadership (76)</strong> in excellence zone. Direct leaders are the primary recovery lever." data-pt="<strong>Liderança (76)</strong> na zona de excelência. Líderes diretos são a principal alavanca de recuperação."><strong>Leadership (76)</strong> in excellence zone. Direct leaders are the primary recovery lever.</span></div>
+        <div class="rec-item"><span class="rec-arrow">→</span><span data-en="<strong>83% participation</strong>. The team wants to be heard — this window must be used." data-pt="<strong>83% de participação</strong>. O time quer ser ouvido — essa janela precisa ser aproveitada."><strong>83% participation</strong>. The team wants to be heard — this window must be used.</span></div>
+      </div>
+    </div>
+    <div class="card rec-card">
+      <div class="rec-header">
+        <div class="card-head-icon" style="width:30px;height:30px;border-radius:8px">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="rec-badge badge-blue" data-en="Priority" data-pt="Prioridade">Priority</span>
+        <span class="rec-title" data-en="Actions" data-pt="Ações">Actions</span>
+      </div>
+      <div class="rec-list">
+        <div class="rec-item"><span class="rec-arrow">→</span><span data-en="<strong>Leadership Ownership:</strong> Change management and team conversations must be reinforced and owned by the direct manager." data-pt="<strong>Protagonismo da liderança:</strong> A gestão da mudança e conversas de time precisa ser reforçada e priorizada pelo líder direto."><strong>Leadership Ownership:</strong> Change management and team conversations must be reinforced and owned by the direct manager.</span></div>
+        <div class="rec-item"><span class="rec-arrow">→</span><span data-en="<strong>Satisfaction:</strong> build individual narrative per team. Strategic vision exists — personal translation is missing." data-pt="<strong>Satisfação:</strong> construir narrativa individual por time. A visão estratégica existe — falta a tradução pessoal."><strong>Satisfaction:</strong> build individual narrative per team. Strategic vision exists — personal translation is missing.</span></div>
+        <div class="rec-item"><span class="rec-arrow">→</span><span data-en="<strong>Loyalty:</strong> leaders proactively strengthen key relationships — recognition, career clarity, open dialogue." data-pt="<strong>Lealdade:</strong> líderes fortalecem relações com pessoas-chave — reconhecimento, clareza de carreira, diálogo aberto."><strong>Loyalty:</strong> leaders proactively strengthen key relationships — recognition, career clarity, open dialogue.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- PDF LOADING OVERLAY -->
+<div id="pdfOverlay">
+  <div class="pdf-overlay-box">
+    <div class="pdf-overlay-spinner"></div>
+    <div class="pdf-overlay-title" id="overlayTitle">Generating PDF…</div>
+    <div class="pdf-overlay-sub" id="overlaySub">Rendering both pages</div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const engDepts  = ['Management','Sales (Partners)','Sales (SMB)','Technology','Finance','Product','Operations','CX','Marketing'];
+const engScores = [89,83,78,75,75,70,67,64,59];
+const engDeltas = [-1,0,0,-11,-5,-23,-8,0,-18];
+const leadDepts  = ['Management','Sales (SMB)','Operations','Technology','Finance','Sales (Partners)','Mkt','Product','CX'];
+const leadScores = [90,85,82,80,77,76,66,65,64];
+const leadDeltas = [-10,0,+2,-4,-1,0,-7,-15,+4];
+
+// ── HBAR BUILDER ──
+function buildHBar(containerId, depts, scores, deltas) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  depts.forEach((dept, i) => {
+    const score = scores[i];
+    const delta = deltas[i];
+    const isRed = score < 70;
+    const isAmber = score >= 70 && score < 75;
+    const barColor = isRed ? 'var(--red)' : isAmber ? 'var(--amber)' : 'var(--accent)';
+    let deltaHtml = '';
+    if (delta === 0) {
+      deltaHtml = `<span class="delta-tag" style="background:var(--surface-2);color:var(--text-tertiary)">—</span>`;
+    } else if (delta > 0) {
+      deltaHtml = `<span class="delta-tag" style="background:var(--green-soft);color:var(--green)">+${delta}</span>`;
+    } else {
+      const intensity = Math.abs(delta) >= 15 ? 'var(--red)' : Math.abs(delta) >= 8 ? 'var(--amber)' : 'var(--text-secondary)';
+      const bg = Math.abs(delta) >= 15 ? 'var(--red-soft)' : Math.abs(delta) >= 8 ? 'var(--amber-soft)' : 'var(--surface-2)';
+      deltaHtml = `<span class="delta-tag" style="background:${bg};color:${intensity}">${delta}</span>`;
+    }
+    el.innerHTML += `
+      <div class="hbar-row">
+        <div class="hbar-label">${dept}</div>
+        <div class="hbar-track">
+          <div class="hbar-fill" style="width:${score}%;background:${barColor}"></div>
+          <div class="hbar-excellence-line"></div>
+        </div>
+        <div class="hbar-right">
+          <div class="hbar-score">${score}</div>
+          ${deltaHtml}
+        </div>
+      </div>`;
+  });
+  el.innerHTML += `<div class="hbar-excellence-label" data-en="Excellence Zone (≥75) ▲" data-pt="Zona de Excelência (≥75) ▲">Excellence Zone (≥75) ▲</div>`;
+}
+
+buildHBar('engList', engDepts, engScores, engDeltas);
+buildHBar('leadList', leadDepts, leadScores, leadDeltas);
+
+// ── LANG STATE (declared early; used by heatmap render) ──
+let lang = 'en';
+
+// ── TREND CHART ──
+const trendCtx = document.getElementById('trendChart');
+new Chart(trendCtx, {
+  type: 'line',
+  data: {
+    labels: ['26 Jan','25 Feb','28 Mar','27 Apr'],
+    datasets: [
+      { label: 'Engagement Index', data: [78,80,81,72], borderColor: '#1A90FF', backgroundColor: 'rgba(26,144,255,0.06)', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#1A90FF', tension: 0.3, fill: true },
+      { label: 'Trust',       data: [85,86,84,79], borderColor: '#1a7a3a', borderWidth: 1.8, pointRadius: 3, pointBackgroundColor: '#1a7a3a', tension: 0.3, fill: false },
+      { label: 'Satisfaction',data: [80,73,72,62], borderColor: '#c0392b', borderWidth: 1.8, pointRadius: 3, pointBackgroundColor: '#c0392b', tension: 0.3, fill: false },
+      { label: 'Engagement',  data: [79,79,79,65], borderColor: '#7b3fa0', borderWidth: 1.8, pointRadius: 3, borderDash:[4,3], pointBackgroundColor: '#7b3fa0', tension: 0.3, fill: false },
+      { label: 'Loyalty',     data: [55,52,49,39], borderColor: '#92580a', borderWidth: 1.8, pointRadius: 3, borderDash:[6,3], pointBackgroundColor: '#92580a', tension: 0.3, fill: false }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { font: { size: 10, family: 'Inter' }, boxWidth: 14, padding: 14, color: '#6e6e73' } },
+      tooltip: { mode: 'index', intersect: false, backgroundColor: '#1d1d1f', padding: 12, titleFont: { size: 11 }, bodyFont: { size: 11 } }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Inter' }, color: '#aeaeb2' } },
+      y: { min: 25, max: 100, ticks: { font: { size: 10, family: 'Inter' }, color: '#aeaeb2', stepSize: 15 }, grid: { color: 'rgba(0,0,0,0.04)' } }
+    }
+  }
+});
+
+// ── LANG ──
+function toggleLang() {
+  lang = lang === 'en' ? 'pt' : 'en';
+  document.getElementById('langFlag').textContent = lang === 'en' ? '🇧🇷' : '🇺🇸';
+  document.getElementById('langLabel').textContent = lang === 'en' ? 'PT' : 'EN';
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const t = el.getAttribute('data-' + lang);
+    if (t) el.innerHTML = t;
+  });
+}
+
+// ── PAGES ──
+function switchPage(i) {
+  document.querySelectorAll('.page').forEach((p,j) => p.classList.toggle('active', i===j));
+  document.querySelectorAll('.tab').forEach((t,j) => t.classList.toggle('active', i===j));
+}
+
+// ── EXPORT PDF ──
+async function exportPDF() {
+  const btn = document.getElementById('pdfBtn');
+  const overlay = document.getElementById('pdfOverlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlaySub = document.getElementById('overlaySub');
+
+  btn.classList.add('loading');
+  overlay.classList.add('visible');
+
+  const { jsPDF } = window.jspdf;
+
+  const captureOpts = {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#f5f5f7',
+    logging: false,
+    removeContainer: true,
+  };
+
+  const topbar = document.querySelector('.topbar');
+  const tabsbar = document.querySelector('.tabs-bar');
+  const pages = document.querySelectorAll('.page');
+
+  overlayTitle.textContent = 'Preparing pages…';
+  overlaySub.textContent = 'Capturing charts';
+  await new Promise(r => setTimeout(r, 60));
+
+  // Snapshot all Chart.js canvases before cloning
+  const chartSnapshots = new Map();
+  document.querySelectorAll('canvas').forEach(c => {
+    try { chartSnapshots.set(c.id, c.toDataURL('image/png')); } catch(e) {}
+  });
+
+  // Build hidden wrapper with both pages stacked
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = `
+    position: fixed; left: -9999px; top: 0;
+    width: 1200px; background: #f5f5f7;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  `;
+
+  // Header (without PDF button)
+  const headerClone = topbar.cloneNode(true);
+  headerClone.style.cssText = 'position:static;width:100%;';
+  headerClone.querySelector('#pdfBtn')?.remove();
+  wrapper.appendChild(headerClone);
+
+  // Tabs
+  const tabsClone = tabsbar.cloneNode(true);
+  tabsClone.style.cssText = 'position:static;width:100%;';
+  wrapper.appendChild(tabsClone);
+
+  // Clone each page, replacing canvases with static images
+  const makePageWrap = (pageEl, label) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'padding: 40px 48px 60px; background: #f5f5f7;';
+    const sep = document.createElement('div');
+    sep.style.cssText = 'font-size:10px;font-weight:700;color:#aeaeb2;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.08);';
+    sep.textContent = label;
+    wrap.appendChild(sep);
+    const clone = pageEl.cloneNode(true);
+    clone.style.cssText = 'display:block !important;';
+    // Remove nav button
+    clone.querySelector('button[onclick="switchPage(1)"]')
+      ?.closest('div[style*="justify-content:flex-end"]')?.remove();
+    // Replace canvases with snapshots
+    clone.querySelectorAll('canvas').forEach(clonedCanvas => {
+      const dataURL = chartSnapshots.get(clonedCanvas.id);
+      if (!dataURL) return;
+      const img = document.createElement('img');
+      img.src = dataURL;
+      img.style.cssText = `width:100%;height:280px;display:block;`;
+      clonedCanvas.replaceWith(img);
+    });
+    wrap.appendChild(clone);
+    return wrap;
+  };
+
+  pages.forEach((page, i) => {
+    const labels = ['Overview', 'Engagement'];
+    wrapper.appendChild(makePageWrap(page, labels[i] || `Page ${i+1}`));
+  });
+
+  document.body.appendChild(wrapper);
+  await new Promise(r => setTimeout(r, 300));
+
+  overlayTitle.textContent = 'Rendering…';
+  overlaySub.textContent = 'This may take a few seconds';
+
+  try {
+    const canvas = await html2canvas(wrapper, captureOpts);
+
+    overlayTitle.textContent = 'Building PDF…';
+    overlaySub.textContent = 'Almost done';
+    await new Promise(r => setTimeout(r, 80));
+
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    const pxToMm = 0.264583;
+    const pageW = canvas.width * pxToMm / 2;
+    const pageH = canvas.height * pxToMm / 2;
+
+    const pdf = new jsPDF({
+      orientation: pageW > pageH ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [pageW, pageH],
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH, '', 'FAST');
+    pdf.save('Our-Climate-ContaAzul-Apr2026.pdf');
+
+  } finally {
+    document.body.removeChild(wrapper);
+    overlay.classList.remove('visible');
+    btn.classList.remove('loading');
+  }
+}
+</script>
+</body>
+</html>
